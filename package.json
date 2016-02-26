@@ -1,5 +1,5 @@
 {
-  "name": "redux-devtools-inspector",
+  "name": "@minedeljkovic/redux-devtools-inspector",
   "version": "0.1.8",
   "description": "Redux DevTools Diff Monitor",
   "scripts": {
