@@ -3,8 +3,8 @@
   "version": "0.1.7",
   "description": "Redux DevTools Diff Monitor",
   "scripts": {
-    "build:lib": "NODE_ENV=production babel src --out-dir lib",
-    "build:demo": "NODE_ENV=production webpack -p",
+    "build:lib": "babel src --out-dir lib",
+    "build:demo": "webpack -p",
     "stats": "webpack --profile --json > stats.json",
     "start": "webpack-dev-server",
     "lint": "eslint src",
