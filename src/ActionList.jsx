@@ -11,6 +11,14 @@ function getTime(actions, actionIds, actionId) {
     dateformat(actions[actionId].timestamp, 'h:MM:ss.L');
 }
 
+const renderActionType = (action) => {
+  let subActionType = '';
+  if (action.action) {
+    subActionType = ` > ${renderActionType(action.action)}`;
+  };
+  return `${action.type}${subActionType}`;
+}
+
 const ActionList = ({
   theme, defaultTheme, actions, actionIds, isWideLayout,
   selectedActionId, onSelect, onSearch, searchValue
@@ -34,7 +42,7 @@ const ActionList = ({
                 actionId === selectedActionId && 'actionListItemSelected'
              )}
              onClick={() => onSelect(actionId)}>
-          {actions[actionId].action.type}
+          {renderActionType(actions[actionId].action)}
           <div {...createTheme('actionListItemTime')}>
             {getTime(actions, actionIds, actionId)}
           </div>

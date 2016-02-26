@@ -36,5 +36,6 @@ export default combineReducers({
             }
           }]
         }
-      } : state
+      } : state,
+  subActions: (state = 0, action) => action.type === 'CHANGE_CHILD1' ? state + 1 : state
 });

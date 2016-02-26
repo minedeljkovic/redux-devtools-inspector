@@ -43,6 +43,7 @@ class DemoApp extends React.Component {
           <Button onClick={this.props.pop} style={styles.button}>Pop</Button>
           <Button onClick={this.props.replace} style={styles.button}>Replace</Button>
           <Button onClick={this.props.nested} style={styles.button}>Change Nested</Button>
+          <Button onClick={this.props.subActions} style={styles.button}>Sub Actions</Button>
         </div>
       </div>
     );
@@ -56,6 +57,12 @@ export default connect(
     push: () => ({ type: 'PUSH' }),
     pop: () => ({ type: 'POP' }),
     replace: () => ({ type: 'REPLACE' }),
-    nested: () => ({ type: 'CHANGE_NESTED' })
+    nested: () => ({ type: 'CHANGE_NESTED' }),
+    subActions: () => ({ 
+      type: 'CHANGE_CHILD1',
+      action: {
+        type: 'CHILD1_ACTION'
+      }
+    })
   }
 )(DemoApp);
