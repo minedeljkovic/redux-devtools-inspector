@@ -20,10 +20,10 @@ const renderActionType = (action) => {
 }
 
 const ActionList = ({
-  theme, defaultTheme, actions, actionIds, isWideLayout,
+  theme, actions, actionIds, isWideLayout,
   selectedActionId, onSelect, onSearch, searchValue
 }) => {
-  const createTheme = themeable({ ...theme, ...defaultTheme });
+  const createTheme = themeable(theme);
   const lowerSearchValue = searchValue && searchValue.toLowerCase();
   const filteredActionIds = searchValue ? actionIds.filter(
     id => actions[id].action.type.toLowerCase().indexOf(lowerSearchValue) !== -1
@@ -35,14 +35,16 @@ const ActionList = ({
       <input {...createTheme('actionListSearch')}
              onChange={e => onSearch(e.target.value)}
              placeholder='filter...' />
-      {filteredActionIds.map(actionId =>
-        <div key={actionId}
+      {filteredActionIds.map((actionId, idx) =>
+        <div key={idx}
              {...createTheme(
                 'actionListItem',
                 actionId === selectedActionId && 'actionListItemSelected'
              )}
              onClick={() => onSelect(actionId)}>
-          {renderActionType(actions[actionId].action)}
+          <div {...createTheme('actionListItemName')}>
+            {renderActionType(actions[actionId].action)}
+          </div>
           <div {...createTheme('actionListItemTime')}>
             {getTime(actions, actionIds, actionId)}
           </div>

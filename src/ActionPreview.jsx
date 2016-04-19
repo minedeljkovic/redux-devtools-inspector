@@ -1,32 +1,24 @@
 import React from 'react';
 import themeable from './themeable';
-import { DiffPatcher } from 'jsondiffpatch/src/diffpatcher';
-import JSONTree from '@alexkuz/react-json-tree';
+import JSONTree from 'react-json-tree';
 import ActionPreviewHeader from './ActionPreviewHeader';
 import JSONDiff from './JSONDiff';
-import deepMap from './deepMap';
+import { Iterable } from 'immutable';
+import isIterable from './isIterable';
 
-const jsonDiff = new DiffPatcher({});
+const IS_IMMUTABLE_KEY = '@@__IS_IMMUTABLE__@@';
 
-function getInspectedState(state, path, purgeFunctions) {
-  state = path.length ?
-    {
-      [path[path.length - 1]]: path.reduce(
-        (s, key) => s && s[key],
-        state
-      )
-    } : state;
-
-  return purgeFunctions ?
-    deepMap(state, val => typeof val === 'function' ? 'fn()' : val) :
-    state;
+function isImmutable(value) {
+  return Iterable.isKeyed(value) || Iterable.isIndexed(value) || Iterable.isIterable(value);
 }
 
 function getItemString(createTheme, type, data) {
   let text;
 
   function getShortTypeString(val) {
-    if (Array.isArray(val)) {
+    if (isIterable(val) && !isImmutable(val)) {
+      return '(…)';
+    } else if (Array.isArray(val)) {
       return val.length > 0 ? '[…]' : '[]';
     } else if (val === null) {
       return 'null';
@@ -38,6 +30,8 @@ function getItemString(createTheme, type, data) {
       return 'fn';
     } else if (typeof val === 'string') {
       return `"${val.substr(0, 10) + (val.length > 10 ? '…' : '')}"`
+    } else if (typeof val === 'symbol') {
+      return 'symbol'
     } else {
       return val;
     }
@@ -63,17 +57,29 @@ function getItemString(createTheme, type, data) {
     text = type;
   }
 
-  return <span {...createTheme('treeItemHint')}> {text}</span>;
+  const immutableStr = data[IS_IMMUTABLE_KEY] ? 'Immutable' : '';
+
+  return <span {...createTheme('treeItemHint')}> {immutableStr} {text}</span>;
+}
+
+function convertImmutable(value) {
+  if (isImmutable(value)) {
+    value = value.toSeq().__toJS();
+    Object.defineProperty(value, IS_IMMUTABLE_KEY, {
+      enumerable: false,
+      configurable: false,
+      writable: false,
+      value: true
+    });
+  }
+
+  return value;
 }
 
 const ActionPreview = ({
-  theme, defaultTheme, fromState, toState, onInspectPath, inspectedPath, tab, onSelectTab
+  theme, delta, nextState, onInspectPath, inspectedPath, tab, onSelectTab, action, base16Theme
 }) => {
-  const createTheme = themeable({ ...theme, ...defaultTheme });
-  const delta = fromState && toState && jsonDiff.diff(
-    getInspectedState(fromState.state, inspectedPath, true),
-    getInspectedState(toState.state, inspectedPath, true)
-  );
+  const createTheme = themeable(theme);
 
   const labelRenderer = (key, ...rest) =>
     <span>
@@ -92,20 +98,22 @@ const ActionPreview = ({
   return (
     <div key='actionPreview' {...createTheme('actionPreview')}>
       <ActionPreviewHeader {...{
-        theme, defaultTheme, inspectedPath, onInspectPath, tab, onSelectTab
+        theme, inspectedPath, onInspectPath, tab, onSelectTab
       }} />
       {tab === 'Diff' && delta &&
-        <JSONDiff {...{ delta, labelRenderer, theme, defaultTheme }} />
+        <JSONDiff {...{ delta, labelRenderer, theme, base16Theme }} />
       }
       {tab === 'Diff' && !delta &&
         <div {...createTheme('stateDiffEmpty')}>
           (states are equal)
         </div>
       }
-      {tab === 'State' && toState &&
+      {(tab === 'State' && nextState || tab === 'Action') &&
         <JSONTree labelRenderer={labelRenderer}
-                  data={getInspectedState(toState.state, inspectedPath)}
+                  theme={base16Theme}
+                  data={tab === 'Action' ? action : nextState}
                   getItemString={(type, data) => getItemString(createTheme, type, data)}
+                  postprocessValue={convertImmutable}
                   getItemStringStyle={
                     (type, expanded) => ({ display: expanded ? 'none' : 'inline' })
                   }

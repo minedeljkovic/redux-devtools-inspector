@@ -1,5 +1,7 @@
 # redux-devtools-inspector
 
+[![npm version](https://badge.fury.io/js/redux-devtools-inspector.svg)](https://badge.fury.io/js/redux-devtools-inspector)
+
 A state monitor for [Redux DevTools](https://github.com/gaearon/redux-devtools) that provides a convenient way to inspect "real world" app states that could be complicated and deeply nested.
 
 ![](demo.gif)
@@ -41,9 +43,10 @@ You may pin a certain part of the state to only track its changes.
 
 ### Props
 
-Name                  | Description
--------------         | -------------
-`theme`               | An object, containing classnames or style objects that are used to style `Inspector` (similar to [react-themeable](https://github.com/markdalgleish/react-themeable)).
+Name               | Type             | Description
+------------------ | ---------------- | -------------
+`theme`            | Object or string | Contains either [base16](https://github.com/chriskempson/base16) theme name or object, that can be `base16` colors map or object containing classnames or styles.
+`supportImmutable` | Boolean          | Better `Immutable` rendering in `Diff` (can affect performance if state has huge objects/arrays). `false` by default.
 
 ### License
 
